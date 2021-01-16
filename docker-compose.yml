@@ -1,0 +1,43 @@
+version: '2'
+services: 
+  db:
+    image: mysql:5.7  # dung latest la meo connect dc dau  dkm 
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345678
+      # MYSQL_HOST: localhost
+      # MYSQL_DATABASE: noteapp   #ko can phai rails db:create
+      # MYSQL_USER: appuser
+      # MYSQL_PASSWORD: 12345678
+    ports: 
+      - "3308:3306"
+    expose: 
+      - 3306
+    container_name: DB_Service
+  app:
+    build: .
+    # chạy nhiều 
+    command: bash -c " rails db:create && rails db:migrate && rails s -p 3000 -b '0.0.0.0' "
+    volumes: 
+      - ".:/noteapp"
+    ports: 
+      - "3003:3000"
+      - "3330:3333"
+    expose: 
+      - 3000
+    depends_on: # db phai chay truoc thang app
+      - db
+    links: #link voi services db co the connect thong qua ten la db
+      - db
+    environment: 
+      DB_USERNAME: root
+      DB_PASSWORD: 12345678
+      DB_HOST: db 
+      DB_SOCKET: /var/run/mysqld/mysqld.sock
+      DB_PORT: 3306
+      DATABASE_URL: 'mysql2://db'
+      RAILS_ENV: 'development'
+    restart: on-failure  # khởi động lại khi lỗi. always - luôn khởi động lại
+    # context:  #Either a path to a directory containing a Dockerfile, or a url to a git repository.
+
+
